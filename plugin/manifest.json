@@ -1,0 +1,12 @@
+{
+    "manifest_version": 2,
+    "name": "chessPlugin",
+    "version": "1.0",
+
+    "content_scripts": [
+        {
+            "matches": ["https://www.chess.com/*", "https://developer.mozilla.org/*"],
+            "js": ["chessPlugin.js"]
+        }
+    ]
+}

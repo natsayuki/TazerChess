@@ -1,0 +1,18 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "ffish": "^0.5.1",
+    "http": "0.0.1-security",
+    "path": "^0.12.7",
+    "stockfish": "^11.0.0"
+  }
+}
