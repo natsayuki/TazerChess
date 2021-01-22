@@ -9,6 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "child-process": "^1.0.2",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "ffish": "^0.5.1",
     "http": "0.0.1-security",

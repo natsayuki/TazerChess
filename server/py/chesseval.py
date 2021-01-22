@@ -22,7 +22,7 @@ game = game.end()
 board = game.board()
 
 # open stockfish 12
-engine = chess.engine.SimpleEngine.popen_uci('stockfish')
+engine = chess.engine.SimpleEngine.popen_uci('py/stockfish')
 
 # analyse current game to depth of 20
 info = engine.analyse(board, chess.engine.Limit(depth=20))
@@ -30,3 +30,6 @@ info = engine.analyse(board, chess.engine.Limit(depth=20))
 # get the WDL score from the analyse
 score = info['score'].white().score() / 100
 print(score)
+sys.stdout.flush()
+engine.close()
+sys.exit()
