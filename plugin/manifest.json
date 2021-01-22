@@ -8,5 +8,8 @@
             "matches": ["https://www.chess.com/*", "https://developer.mozilla.org/*"],
             "js": ["chessPlugin.js"]
         }
+    ],
+    "permissions": [
+      "*://localhost/*"
     ]
 }
