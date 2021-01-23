@@ -9,7 +9,7 @@ pgn = sys.argv[1]
 
 # turn edited PGN into actual PGN
 pgn = pgn.replace('_', ' ')
-pgn = pgn.replace('-', '=')
+pgn = pgn.replace('[', '=')
 
 # pretend PGN is being read from file stream
 pgn = io.StringIO(pgn)

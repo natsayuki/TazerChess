@@ -1,52 +1,46 @@
+console.log('infiltrated');
+
 // vars
-let resignFlag;
-let gameStarted = false;
 let gameState = '';
 let prevGameState;
 
-// main interval to handle chess scrapper and WDL grabbing
 setInterval(function(){
-  // Searches page for resign flag to tell if a game is in progress
-  resignFlag = document.querySelector('span.icon-font-chess.flag');
-  gameStarted = resignFlag != null;
-
   // sets previous gamestate
   prevGameState = gameState;
 
-  if(gameStarted){
-    // sets game state
-    gameState = fetchPGN();
+  // sets game state
+  gameState = fetchPGN();
 
-    if(gameState != prevGameState){
-      // URL for node server that calcs WDL
-      const url = `http://localhost:3001/api?pgn=${pgnToApiString(gameState)}`;
-      
-      fetch(url)
-      .then(res => res.json())
-      .then(data => {
-        // gets WDL from the response from the API
-        const wdl = data.advantage
-        console.log(wdl);
-      });
-    }
+  if(gameState != prevGameState && recentMove(gameState)){
+
+    const isWhite = 
+
+    // If it is the first move of the game, reset the WDL on server
+    if(gameState.split(' ').length - 1 == 1) fetch('http://localhost:3001/reset');
+
+
+    // URL for node server that calcs WDL
+    const url = `http://localhost:3001/api?pgn=${recentMove(gameState)}&iswhite=true`;
+    console.log(recentMove(gameState));
+
+    fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      // gets WDL from the response from the API
+      const wdl = data.advantage
+    });
   }
-}, 200);
+}, 250);
+
 
 // function for getting PGN of current game
-// Param: `long` allows for full vs abreviated PGN
-function fetchPGN(long){
+function fetchPGN(){
   // Gets list of moves from the HTML
   const moves = document.querySelectorAll('.move');
   let pgn = '';
 
-  // PGN headers for long version
-  if(long) pgn += `[Event "api check"][Site "Chess.com"][Date "???"][Round "?"][White "White"][Black "Black"][Variant "chess"]`;
-
   // Loops through moves from the webpage
   moves.forEach((move, index) => {
-    // Adds turn numbers for long version
-    if(long) pgn += `${index + 1}. `;
-
     // parses HTML within each move element to get PGN
     move.querySelectorAll('.node').forEach(node => {
       // Child is the element that contains raw PGN vs an image
@@ -72,22 +66,11 @@ function fetchPGN(long){
     });
   });
 
-  // Adds * onto end if long form
-  if(long) pgn += '*';
-
   // returns pgn
   return pgn;
 }
 
-// function turning PGN into a string that can be sent to the Node server API
-// Param: `pgn` is PGN to be converted
-function pgnToApiString(pgn){
-  // replaces spaces with underscores
-  pgn = pgn.replace(/\s/gm, '_');
-
-  // replaces `=` with `-`
-  pgn = pgn.replace(/=/gm, '-');
-
-  // returns the abridged PGN
-  return pgn
+function recentMove(pgn){
+  pgn = pgn.split(' ');
+  return pgn[pgn.length - 2];
 }
