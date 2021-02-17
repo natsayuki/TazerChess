@@ -3,6 +3,7 @@ console.log('infiltrated');
 // vars
 let gameState = '';
 let prevGameState;
+let coords = document.querySelectorAll('.coordinate-dark');
 
 setInterval(function(){
   // sets previous gamestate
@@ -13,15 +14,19 @@ setInterval(function(){
 
   if(gameState != prevGameState && recentMove(gameState)){
 
-    const isWhite = 
+    coords = document.querySelectorAll('.coordinate-dark');
+    const isWhite = parseInt(coords[0].textContent) > parseInt(coords[1].textContent);
 
     // If it is the first move of the game, reset the WDL on server
-    if(gameState.split(' ').length - 1 == 1) fetch('http://localhost:3001/reset');
+    if(gameState.split('_').length - 1 == 1){
+      fetch('http://localhost:3001/reset');
+    }
 
+    turn = gameState.split('_').length - 1;
 
+    let pgn = recentMove(gameState);
     // URL for node server that calcs WDL
-    const url = `http://localhost:3001/api?pgn=${recentMove(gameState)}&iswhite=true`;
-    console.log(recentMove(gameState));
+    const url = `http://localhost:3001/api?pgn=${pgn}&iswhite=${isWhite}`;
 
     fetch(url)
     .then(res => res.json())
@@ -37,6 +42,7 @@ setInterval(function(){
 function fetchPGN(){
   // Gets list of moves from the HTML
   const moves = document.querySelectorAll('.move');
+  // const moves = document.querySelectorAll('.move-text-component');
   let pgn = '';
 
   // Loops through moves from the webpage
@@ -59,10 +65,10 @@ function fetchPGN(){
       }
 
       // If there is an =, it is a pawn assension and PGN is swapped
-      if(node.textContent.indexOf('=') != -1) pgn += `${node.textContent}${piece} `;
+      if(node.textContent.indexOf('=') != -1) pgn += `${node.textContent}${piece}_`;
 
       // Normal PGN order
-      else pgn += `${piece}${node.textContent} `;
+      else pgn += `${piece}${node.textContent}_`;
     });
   });
 
@@ -71,6 +77,6 @@ function fetchPGN(){
 }
 
 function recentMove(pgn){
-  pgn = pgn.split(' ');
-  return pgn[pgn.length - 2];
+  pgn = pgn.split('_');
+  return pgn[pgn.length - 2].replace('=', ':');
 }

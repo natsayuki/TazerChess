@@ -9,7 +9,7 @@ pgn = sys.argv[1]
 
 # turn edited PGN into actual PGN
 pgn = pgn.replace('_', ' ')
-pgn = pgn.replace('[', '=')
+pgn = pgn.replace(':', '=')
 
 # pretend PGN is being read from file stream
 pgn = io.StringIO(pgn)
@@ -25,11 +25,11 @@ board = game.board()
 engine = chess.engine.SimpleEngine.popen_uci('py/stockfish')
 
 # analyse current game to depth of 20
-info = engine.analyse(board, chess.engine.Limit(depth=20))
+info = engine.analyse(board, chess.engine.Limit(depth=15))
 
 # get the WDL score from the analyse
 score = info['score'].white().score() / 100
 print(score)
-sys.stdout.flush()
 engine.close()
+sys.stdout.flush()
 sys.exit()

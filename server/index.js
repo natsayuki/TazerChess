@@ -5,9 +5,9 @@ const path = require('path');
 const util = require('util');
 const spawn = require('child_process').spawn;
 const cors = require('cors');
+const fetch = require('node-fetch');
 
 let prevWDL = 0;
-let turn = true;
 let pgn = '';
 
 // server setup
@@ -29,9 +29,19 @@ app.get('/api', (req, res) => {
   // Gets pgn from url params
   pgn += `${req.query.pgn}_`;
 
+
+  getWDL(req, res, pgn, prevWDL);
+
+});
+
+function getWDL(req, res, moves, lastWDL){
+
   // Get if player is white from url params
   let isWhite = req.query.iswhite;
   isWhite = isWhite == 'true';
+
+  const turn = moves.split('_').length - 1;
+
 
   // Create python spawn to evaluate game state
   const py = spawn('python', ['py/chesseval.py', pgn]);
@@ -40,28 +50,29 @@ app.get('/api', (req, res) => {
   py.stdout.on('data', data => {
     wdl = parseFloat(data.toString('utf8'));
 
-    const move = pgn.split('_').length - 1;
+    const move = moves.split('_').length - 1;
 
     // Set weight based on range of WDl
     let weight = 6;
-    if(wdl > -5 && wdl < 5) weight = 3;
+    if(lastWDL > -5 && lastWDL < 5) weight = 3;
 
-    const diff = wdl - prevWDL;
+    const diff = wdl - lastWDL;
 
     let advantage = 'nuetral'
     if(diff > 0) advantage = 'white';
     if(diff < 0) advantage = 'black';
 
     let type = 'Neutral';
-    if(Math.abs(diff) > weight) type = 'Blunder';
-
-    // if(isWhite == turn){
-    //   prevWDL = wdl;
-    // }
+    if(diff > weight && !isWhite) type = 'Blunder';
+    if(diff < -weight && isWhite) type = 'Blunder';
 
     prevWDL = wdl;
 
-    console.log(pgn);
+    if(type == 'Blunder'){
+      fetch('http://192.168.1.69:3001');
+    }
+
+    // console.log(moves);
     console.log(`${move}. ${wdl} adv ${advantage} ${type}`);
 
     // Sends JSON result to client
@@ -70,11 +81,8 @@ app.get('/api', (req, res) => {
       'advantage': advantage,
       'type': type,
     });
-
-    turn = !turn;
   });
-
-});
+}
 
 // sets static dir
 app.use(express.static(__dirname));
